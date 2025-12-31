@@ -16,6 +16,13 @@ type Task struct {
 }
 
 const filename = "thingstodo.json"
+const helpMessage = `ℹ️Help
+
+➕ Add — create a new task  
+📋 List — view your tasks  
+❌ Delete — remove a task  
+
+Just tap the buttons below 👇`
 
 func addTask(chatID int64, description string) error {
 	var thingstodo map[int64][]Task
@@ -30,7 +37,7 @@ func addTask(chatID int64, description string) error {
 	if thingstodo == nil {
 		thingstodo = make(map[int64][]Task)
 	}
-	
+
 	tasks := thingstodo[chatID]
 
 	newTask := Task{
@@ -40,7 +47,6 @@ func addTask(chatID int64, description string) error {
 
 	tasks = append(tasks, newTask)
 	thingstodo[chatID] = tasks
-
 
 	updateData, err := json.MarshalIndent(thingstodo, "", "")
 	if err != nil {
@@ -54,20 +60,21 @@ func list(chatID int64) (string, error) {
 
 	fileData, err := os.ReadFile(filename)
 	if err != nil {
-		return "", err
+		return "No tasks found, add some tasks", nil
 	}
 
-	var thingstodo []Task
+	var thingstodo map[int64][]Task
 	if err := json.Unmarshal(fileData, &thingstodo); err != nil {
 		return "", err
 	}
 
-	if len(thingstodo) == 0 {
+	tasks := thingstodo[chatID]
+	if len(tasks) == 0 {
 		return "No tasks found, add some tasks", nil
 	}
 
 	var b strings.Builder
-	for _, task := range thingstodo {
+	for _, task := range tasks {
 		fmt.Fprintf(&b, "%d. %s\n", task.NumberOfTask, task.WhatToDo)
 	}
 
@@ -76,42 +83,39 @@ func list(chatID int64) (string, error) {
 }
 
 func deleteTask(chatID int64, number int) error {
-
-	//Read File, so it can see binary stuff there not chars and text as we see
-	fileData, err := os.ReadFile("thingstodo.json")
+	fileData, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}
 
-	//decode json
-	var thingstodo []Task
+	var thingstodo map[int64][]Task
 	if err := json.Unmarshal(fileData, &thingstodo); err != nil {
 		return err
 	}
 
-	//convert task number to slice index
+	tasks := thingstodo[chatID]
+
 	index := number - 1
-	if index < 0 || index >= len(thingstodo) {
+	if index < 0 || index >= len(tasks) {
 		return fmt.Errorf("task %d doesn't exist", number)
 	}
 
-	//delete element from slice
-	thingstodo = append(thingstodo[:index], thingstodo[index+1:]...)
+	// delete task from this user's slice
+	tasks = append(tasks[:index], tasks[index+1:]...)
 
-	//renumber tasks
-	for i := range thingstodo {
-		thingstodo[i].NumberOfTask = i + 1
+	// renumber
+	for i := range tasks {
+		tasks[i].NumberOfTask = i + 1
 	}
 
-	//encode json
-	updateData, err := json.MarshalIndent(thingstodo, "", "")
+	thingstodo[chatID] = tasks
+
+	updateData, err := json.MarshalIndent(thingstodo, "", "  ")
 	if err != nil {
 		return err
 	}
 
-	os.WriteFile(filename, updateData, 0644)
-	fmt.Printf("Task N%d is deleted", number)
-	return nil
+	return os.WriteFile(filename, updateData, 0644)
 
 }
 
@@ -175,10 +179,10 @@ func main() {
 				switch text {
 				case "/start":
 					sendMenu(chatID)
-				case "Add":
+				case "➕Add":
 					chatState[chatID] = "add"
 					sendText(chatID, "Send the task text")
-				case "List":
+				case "📋List":
 					result, err := list(chatID)
 					if err != nil {
 						sendText(chatID, "Failed to list tasks")
@@ -186,7 +190,10 @@ func main() {
 						sendText(chatID, result)
 					}
 					sendMenu(chatID)
-				case "Delete":
+				case "ℹ️Help":
+					sendText(chatID, helpMessage)
+
+				case "❌Delete":
 					chatState[chatID] = "delete"
 					sendText(chatID, "Send the task number to delete")
 
