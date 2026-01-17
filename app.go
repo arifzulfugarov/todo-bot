@@ -124,6 +124,9 @@ func main() {
 	var chatState = make(map[int64]string)
 
 	log.Println("Bot started")
+	log.Println("Bot started")
+	log.Println("TOKEN PRESENT:", os.Getenv("TELEGRAM_TOKEN") != "")
+	log.Println("Entering polling loop")
 
 	offset := 0
 
