@@ -30,23 +30,22 @@ type Chat struct {
 
 // ---- UI ----
 
-func sendMenu(chatID int64) error {
+func sendMenu(chatID int64, text string) error {
 	token := os.Getenv("TELEGRAM_TOKEN")
 	url := "https://api.telegram.org/bot" + token + "/sendMessage"
 
 	payload := map[string]any{
 		"chat_id": chatID,
-		"text":    "Welcome!\n I’m your personal *Todo Bot*\n I help you manage tasks directly in Telegram.\n What can I help you with today?\n",
+		"text":    text,
 		"reply_markup": map[string]any{
 			"keyboard": [][]map[string]string{
 				{
-					{"text": "Add"},
-					{"text": "List"},
-					{"text": "Delete"},
-					{"text": "ℹ️Help"},
+					{"text": "Add"}, {"text": "List"},
+					{"text": "Delete"}, {"text": "ℹ️Help"},
 				},
 			},
-			"resize_keyboard": true,
+			"resize_keyboard":   true,
+			"one_time_keyboard": false,
 		},
 	}
 
@@ -60,6 +59,9 @@ func sendText(chatID int64, text string) error {
 	payload := map[string]any{
 		"chat_id": chatID,
 		"text":    text,
+		"link_preview_options": map[string]any{
+			"is_disabled": true,
+		},
 	}
 
 	return postJSON(url, payload)

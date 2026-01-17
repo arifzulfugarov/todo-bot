@@ -155,6 +155,13 @@ func main() {
 			text := u.Message.Text
 			state := chatState[chatID]
 
+			if u.Message.Text == "" {
+				// UC-5: Provide clear feedback for invalid format
+				sendText(chatID, "Invalid input. Please provide text only (no stickers, photos, or audio).")
+				offset = u.UpdateID + 1
+				continue
+			}
+
 			switch state {
 
 			case "add":
@@ -162,11 +169,10 @@ func main() {
 				if err != nil {
 					sendText(chatID, err.Error())
 				} else {
-					sendText(chatID, "Heeey your task added, don't forget to do it...")
+					sendText(chatID, "Heeey your task added, don't forget to do it... What's next?")
 				}
 
 				chatState[chatID] = ""
-				sendMenu(chatID)
 
 			case "delete":
 				number, err := strconv.Atoi(text)
@@ -183,12 +189,12 @@ func main() {
 				}
 
 				chatState[chatID] = ""
-				sendMenu(chatID)
 
 			default:
 				switch text {
 				case "/start":
-					sendMenu(chatID)
+					welcomeMMessage := "Welcome! \nI’m your personal *Todo Bot*.\nI help you manage tasks directly in Telegram.\n\nWhat can I help you with today?"
+					sendMenu(chatID, welcomeMMessage)
 				case "Add":
 					chatState[chatID] = "add"
 					sendText(chatID, "Send the task text")
@@ -199,7 +205,6 @@ func main() {
 					} else {
 						sendText(chatID, result)
 					}
-					sendMenu(chatID)
 				case "ℹ️Help":
 					sendText(chatID, helpMessage)
 
@@ -208,7 +213,8 @@ func main() {
 					sendText(chatID, "Send the task number to delete")
 
 				default:
-					sendMenu(chatID)
+
+					sendText(chatID, "❓ I didn't understand that. Please use the buttons below.")
 
 				}
 
