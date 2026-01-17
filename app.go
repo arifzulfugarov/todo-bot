@@ -27,6 +27,12 @@ Just tap the buttons below 👇`
 func addTask(chatID int64, description string) error {
 	var thingstodo map[int64][]Task
 
+	text := strings.TrimSpace(description)
+
+	if len(text) > 300 {
+		return fmt.Errorf("Task is too long")
+	}
+
 	fileData, err := os.ReadFile(filename)
 	if err == nil {
 		if err := json.Unmarshal(fileData, &thingstodo); err != nil {
@@ -74,8 +80,8 @@ func list(chatID int64) (string, error) {
 	}
 
 	var b strings.Builder
-	for _, task := range tasks {
-		fmt.Fprintf(&b, "%d. %s\n", task.NumberOfTask, task.WhatToDo)
+	for i, task := range tasks {
+		fmt.Fprintf(&b, "%d. %s\n", i+1, task.WhatToDo)
 	}
 
 	return b.String(), nil
@@ -124,9 +130,6 @@ func main() {
 	var chatState = make(map[int64]string)
 
 	log.Println("Bot started")
-	log.Println("Bot started")
-	log.Println("TOKEN PRESENT:", os.Getenv("TELEGRAM_TOKEN") != "")
-	log.Println("Entering polling loop")
 
 	offset := 0
 

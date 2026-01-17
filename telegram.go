@@ -36,13 +36,13 @@ func sendMenu(chatID int64) error {
 
 	payload := map[string]any{
 		"chat_id": chatID,
-		"text":    "👋 Welcome!\n I’m your personal *Todo Bot*\n 📝I help you manage tasks directly in Telegram.\n What can I help you with today?\n",
+		"text":    "Welcome!\n I’m your personal *Todo Bot*\n I help you manage tasks directly in Telegram.\n What can I help you with today?\n",
 		"reply_markup": map[string]any{
 			"keyboard": [][]map[string]string{
 				{
-					{"text": "➕Add"},
-					{"text": "📋List"},
-					{"text": "❌Delete"},
+					{"text": "Add"},
+					{"text": "List"},
+					{"text": "Delete"},
 					{"text": "ℹ️Help"},
 				},
 			},		
