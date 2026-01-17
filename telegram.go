@@ -45,7 +45,7 @@ func sendMenu(chatID int64) error {
 					{"text": "Delete"},
 					{"text": "ℹ️Help"},
 				},
-			},		
+			},
 			"resize_keyboard": true,
 		},
 	}

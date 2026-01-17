@@ -33,6 +33,10 @@ func addTask(chatID int64, description string) error {
 		return fmt.Errorf("Task is too long")
 	}
 
+	if text == "" {
+		return fmt.Errorf("Please provide text message only")
+	}
+
 	fileData, err := os.ReadFile(filename)
 	if err == nil {
 		if err := json.Unmarshal(fileData, &thingstodo); err != nil {
@@ -150,6 +154,13 @@ func main() {
 			chatID := u.Message.Chat.ID
 			text := u.Message.Text
 			state := chatState[chatID]
+
+			if u.Message.Text == "" {
+				// UC-5: Provide clear feedback for invalid format
+				sendText(chatID, "Invalid input. Please provide text only (no stickers, photos, or audio).")
+				offset = u.UpdateID + 1
+				continue
+			}
 
 			switch state {
 
