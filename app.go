@@ -155,13 +155,6 @@ func main() {
 			text := u.Message.Text
 			state := chatState[chatID]
 
-			if u.Message.Text == "" {
-				// UC-5: Provide clear feedback for invalid format
-				sendText(chatID, "Invalid input. Please provide text only (no stickers, photos, or audio).")
-				offset = u.UpdateID + 1
-				continue
-			}
-
 			switch state {
 
 			case "add":
