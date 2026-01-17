@@ -185,10 +185,10 @@ func main() {
 				switch text {
 				case "/start":
 					sendMenu(chatID)
-				case "➕Add":
+				case "Add":
 					chatState[chatID] = "add"
 					sendText(chatID, "Send the task text")
-				case "📋List":
+				case "List":
 					result, err := list(chatID)
 					if err != nil {
 						sendText(chatID, "Failed to list tasks")
@@ -199,7 +199,7 @@ func main() {
 				case "ℹ️Help":
 					sendText(chatID, helpMessage)
 
-				case "❌Delete":
+				case "Delete":
 					chatState[chatID] = "delete"
 					sendText(chatID, "Send the task number to delete")
 
