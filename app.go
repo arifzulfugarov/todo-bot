@@ -235,7 +235,6 @@ func main() {
 					sendText(chatID, helpMessage)
 
 				case "Delete":
-					sendTextWithRemove(chatID, "🗑️ Preparing your list...")
 					sendDeletionMenu(chatID)
 
 				default:
