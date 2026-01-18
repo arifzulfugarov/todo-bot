@@ -105,6 +105,10 @@ func deleteTask(chatID int64, number int) error {
 
 	tasks := thingstodo[chatID]
 
+	if len(tasks) == 0 {
+		return fmt.Errorf("The list is empty, please add something",)
+	}
+
 	index := number - 1
 	if index < 0 || index >= len(tasks) {
 		return fmt.Errorf("task %d doesn't exist", number)
