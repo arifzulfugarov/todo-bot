@@ -151,6 +151,14 @@ func main() {
 
 		for _, u := range updates {
 
+			// Inside your main loop
+			chatID := u.Message.Chat.ID
+
+			// Save the user's message ID (e.g., "Add" or the task text) to the trash bin
+			h := messageHistory[chatID]
+			h = append(h, u.Message.MessageID)
+			messageHistory[chatID] = h
+
 			if u.CallbackQuery != nil {
 				data := u.CallbackQuery.Data
 				chatID := u.CallbackQuery.Message.Chat.ID
@@ -163,6 +171,7 @@ func main() {
 					if err != nil {
 						sendText(chatID, "Error: "+err.Error())
 					} else {
+						clearAndRefresh(chatID)
 						sendText(chatID, fmt.Sprintf("✅ Task #%d is done, good job!!!", number))
 					}
 				}
@@ -177,7 +186,6 @@ func main() {
 				continue
 			}
 
-			chatID := u.Message.Chat.ID
 			text := u.Message.Text
 			state := chatState[chatID]
 
@@ -193,9 +201,12 @@ func main() {
 			case "add":
 				err := addTask(chatID, text)
 				if err != nil {
-					sendText(chatID, err.Error())
+					sendText(chatID, "❌ "+err.Error())
 				} else {
-					sendMenu(chatID, "Heeey your task added, don't forget to do it... What's next?")
+					clearAndRefresh(chatID)
+
+					currentList, _ := list(chatID)
+					sendMenu(chatID, "✅ Task added! Here is your updated list:\n\n"+currentList)
 				}
 
 				chatState[chatID] = ""

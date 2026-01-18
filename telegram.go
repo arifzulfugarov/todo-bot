@@ -21,9 +21,12 @@ type Update struct {
 }
 
 type Message struct {
-	Text string `json:"text"`
-	Chat Chat   `json:"chat"`
+	MessageID int    `json:"message_id"`
+	Text      string `json:"text"`
+	Chat      Chat   `json:"chat"`
 }
+
+var messageHistory = make(map[int64][]int)
 
 type Chat struct {
 	ID int64 `json:"id"`
@@ -124,6 +127,32 @@ func sendText(chatID int64, text string) error {
 	}
 
 	return postJSON(url, payload)
+
+}
+
+func clearAndRefresh(chatID int64) {
+
+	ids := messageHistory[chatID]
+	if len(ids) > 0 {
+		deleteMultipleMessages(chatID, ids)
+		messageHistory[chatID] = []int{}
+	}
+
+	updatedList, _ := list(chatID)
+	sendText(chatID, "Updated Task List:\n"+updatedList)
+}
+
+func deleteMultipleMessages(chatID int64, ids []int) {
+
+	token := os.Getenv("TELEGRAM_TOKEN")
+	url := "https://api.telegram.org/bot" + token + "/deleteMessages"
+
+	payload := map[string]any{
+		"chat_id":     chatID,
+		"message_ids": ids,
+	}
+
+	postJSON(url, payload)
 }
 
 func sendTextWithRemove(chatID int64, text string) error {
@@ -152,6 +181,33 @@ func postJSON(url string, data any) error {
 		return err
 	}
 	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+
+	var result struct {
+		Ok     bool            `json:"ok"` // 2026 Best Practice: Check OK status first
+		Result json.RawMessage `json:"result"`
+	}
+	json.Unmarshal(body, &result)
+
+	if !result.Ok {
+		return fmt.Errorf("telegram api error: %s", string(body))
+	}
+
+	// Safely try to extract message_id if it exists
+	var msg struct {
+		MessageID int `json:"message_id"`
+	}
+	if json.Unmarshal(result.Result, &msg) == nil && msg.MessageID != 0 {
+		if p, ok := data.(map[string]any); ok {
+			if chatID, ok := p["chat_id"].(int64); ok {
+				h := messageHistory[chatID]
+				h = append(h, msg.MessageID)
+				messageHistory[chatID] = h
+			}
+		}
+	}
+
 	return nil
 }
 
