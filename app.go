@@ -106,7 +106,7 @@ func deleteTask(chatID int64, number int) error {
 	tasks := thingstodo[chatID]
 
 	if len(tasks) == 0 {
-		return fmt.Errorf("The list is empty, please add something",)
+		return fmt.Errorf("The list is empty, please add something")
 	}
 
 	index := number - 1
@@ -173,7 +173,7 @@ func main() {
 				if err != nil {
 					sendText(chatID, err.Error())
 				} else {
-					sendText(chatID, "Heeey your task added, don't forget to do it... What's next?")
+					sendMenu(chatID, "Heeey your task added, don't forget to do it... What's next?")
 				}
 
 				chatState[chatID] = ""
@@ -201,7 +201,7 @@ func main() {
 					sendMenu(chatID, welcomeMMessage)
 				case "Add":
 					chatState[chatID] = "add"
-					sendText(chatID, "Send the task text")
+					sendTextWithRemove(chatID, " Please type your task below:")
 				case "List":
 					result, err := list(chatID)
 					if err != nil {

@@ -67,6 +67,25 @@ func sendText(chatID int64, text string) error {
 	return postJSON(url, payload)
 }
 
+func sendTextWithRemove(chatID int64, text string) error {
+	token := os.Getenv("TELEGRAM_TOKEN")
+	url := "https://api.telegram.org/bot" + token + "/sendMessage"
+
+	payload := map[string]any{
+		"chat_id": chatID,
+		"text":    text,
+		"reply_markup": map[string]any{
+			"remove_keyboard": true,
+			"selective":       true,
+		},
+		"link_preview_options": map[string]any{
+			"is_disabled": true,
+		},
+	}
+
+	return postJSON(url, payload)
+}
+
 func postJSON(url string, data any) error {
 	b, _ := json.Marshal(data)
 	resp, err := http.Post(url, "application/json", bytes.NewReader(b))
