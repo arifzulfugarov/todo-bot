@@ -151,14 +151,6 @@ func main() {
 
 		for _, u := range updates {
 
-			// Inside your main loop
-			chatID := u.Message.Chat.ID
-
-			// Save the user's message ID (e.g., "Add" or the task text) to the trash bin
-			h := messageHistory[chatID]
-			h = append(h, u.Message.MessageID)
-			messageHistory[chatID] = h
-
 			if u.CallbackQuery != nil {
 				data := u.CallbackQuery.Data
 				chatID := u.CallbackQuery.Message.Chat.ID
@@ -172,7 +164,7 @@ func main() {
 						sendText(chatID, "Error: "+err.Error())
 					} else {
 						clearAndRefresh(chatID)
-						sendText(chatID, fmt.Sprintf("✅ Task #%d is done, good job!!!", number))
+						sendMenu(chatID, fmt.Sprintf("✅ Task #%d is done, good job!!!", number))
 					}
 				}
 
@@ -185,6 +177,14 @@ func main() {
 				offset = u.UpdateID + 1
 				continue
 			}
+
+			// Inside your main loop
+			chatID := u.Message.Chat.ID
+
+			// Save the user's message ID (e.g., "Add" or the task text) to the trash bin
+			h := messageHistory[chatID]
+			h = append(h, u.Message.MessageID)
+			messageHistory[chatID] = h
 
 			text := u.Message.Text
 			state := chatState[chatID]
@@ -246,7 +246,10 @@ func main() {
 					sendText(chatID, helpMessage)
 
 				case "Delete":
-					sendDeletionMenu(chatID)
+					err := sendDeletionMenu(chatID)
+					if err != nil {
+						sendText(chatID, "Error showing menu: "+err.Error())
+					}
 
 				default:
 

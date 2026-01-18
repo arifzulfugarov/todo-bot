@@ -35,7 +35,7 @@ type Chat struct {
 type CallbackQuery struct {
 	ID      string   `json:"id"`
 	Message *Message `json:"message"`
-	Data    string   `json: "data"`
+	Data    string   `json:"data"`
 }
 
 // ---- UI ----
@@ -137,9 +137,6 @@ func clearAndRefresh(chatID int64) {
 		deleteMultipleMessages(chatID, ids)
 		messageHistory[chatID] = []int{}
 	}
-
-	updatedList, _ := list(chatID)
-	sendText(chatID, "Updated Task List:\n"+updatedList)
 }
 
 func deleteMultipleMessages(chatID int64, ids []int) {
@@ -185,7 +182,7 @@ func postJSON(url string, data any) error {
 	body, _ := io.ReadAll(resp.Body)
 
 	var result struct {
-		Ok     bool            `json:"ok"` // 2026 Best Practice: Check OK status first
+		Ok     bool            `json:"ok"` //  Check OK status first
 		Result json.RawMessage `json:"result"`
 	}
 	json.Unmarshal(body, &result)
