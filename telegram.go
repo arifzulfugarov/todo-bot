@@ -35,7 +35,7 @@ type Chat struct {
 type CallbackQuery struct {
 	ID      string   `json:"id"`
 	Message *Message `json:"message"`
-	Data    string   `json: "data"`
+	Data    string   `json:"data"`
 }
 
 // ---- UI ----
