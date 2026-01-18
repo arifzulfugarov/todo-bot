@@ -150,6 +150,28 @@ func main() {
 		}
 
 		for _, u := range updates {
+
+			if u.CallbackQuery != nil {
+				data := u.CallbackQuery.Data
+				chatID := u.CallbackQuery.Message.Chat.ID
+
+				if strings.HasPrefix(data, "del_") {
+					numStr := strings.TrimPrefix(data, "del_")
+					number, _ := strconv.Atoi(numStr)
+
+					err := deleteTask(chatID, number)
+					if err != nil {
+						sendText(chatID, "Error: "+err.Error())
+					} else {
+						sendText(chatID, fmt.Sprintf("✅ Task #%d is done, good job!!!", number))
+					}
+				}
+
+				answerCallback(u.CallbackQuery.ID)
+				offset = u.UpdateID + 1
+				continue
+			}
+
 			if u.Message == nil {
 				offset = u.UpdateID + 1
 				continue
@@ -213,8 +235,8 @@ func main() {
 					sendText(chatID, helpMessage)
 
 				case "Delete":
-					chatState[chatID] = "delete"
-					sendText(chatID, "Send the task number to delete")
+					sendTextWithRemove(chatID, "🗑️ Preparing your list...")
+					sendDeletionMenu(chatID)
 
 				default:
 
